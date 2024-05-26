@@ -1,4 +1,6 @@
-import p from './src/mm'
+import mm from './src/mm'
 
 debugger
-p('# h')
+mm('*a*')
+
+export {}

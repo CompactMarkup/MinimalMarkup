@@ -1,3 +1,3 @@
-# MinimalMarkup
+# Minimal Markup – a super lightweight markup language
 
-An absolutely minimalistic markup processor: text ➔ html.
+A minimalistic markup processor: text ➔ html.

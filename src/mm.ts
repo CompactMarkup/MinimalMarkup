@@ -1,4 +1,38 @@
-// Minimal Markup - a super lightweight markup language
+// Minimal Markup – a super lightweight markup language
+
+type str = string // minimal markup
+
+// replace &, < with html entities
+let sanitize = (tx: str): str =>
+  tx.replace(/&/gu, '&amp;').replace(/</gu, '&lt;')
+
+// trim line ends, do simple markup
+// break: \\,
+// bold: *...*
+// italics: /.../
+// underline: _..._
+// code: ~...~
+// n-dash: --
+// m-dash: --
+let simple = (tx: str): str =>
+  tx
+    .split('\n')
+    .map((line) =>
+      line
+        .trimEnd()
+        .replace(/\\\\/gu, '<br/>')
+        .replace(/\*\*(.*?)\*\*/gu, '<b>$1</b>')
+        .replace(/\/\/(.*?)\/\//gu, '<em>$1</em>')
+        .replace(/__(.*?)__/gu, '<u>$1</u>')
+        .replace(/~~(.*?)~~/gu, '<code>$1</code>')
+        .replace(/([^-])--([^-])/gu, '$1&ndash;$2')
+        .replace(/([^-])---([^-])/gu, '$1&mdash;$2'),
+    )
+    .join('\n')
+
+// process minimal markup
+let mm = (tx: str): str => simple(sanitize(tx))
+export default mm
 
 type ArgCb = (...args: str[]) => str
 type ImgCb = (src: str) => str
@@ -25,12 +59,13 @@ export type Cb = {
  * @param {str} url - The url to resolve.
  * @returns {str} The input url unchanged.
  */
-let defLoc = (url: str) => url
+// let defLoc = (url: str) => url
 
 /**
  * Default callbacks
  * @type {Cb}
  */
+/*
 let defCb: Cb = {
   arg: (tag) => tag,
   img: (src) => src,
@@ -43,10 +78,11 @@ let defCb: Cb = {
 
 // wrap tag around val
 let tag = (tag: str, val: str) => `<${tag}>${val}</${tag}>`
-
+*/
 // ----------------------------------
 // parse text -> html, with callbacks
-export default (tx: str, cb: Cb = {}): str => {
+/*
+let qqq = (tx: str, cb: Cb = {}): str => {
   cb = {
     ...defCb, // default callbacks
     ...cb, // override by user callbacks
@@ -206,7 +242,7 @@ export default (tx: str, cb: Cb = {}): str => {
         line
           .trimEnd()
           .replace(/\\\\/gu, '<br/>') // br
-          .replace(/\*\*(.*?)\*\*/gu, '<b>$1</b>') // **bold**
+          .replace(/\*\*(.*?)\*\* /gu, '<b>$1</b>') // **bold**
           .replace(/\/\/(.*?)\/\//gu, '<em>$1</em>') // //italics//
           .replace(/__(.*?)__/gu, '<u>$1</u>') // __underline__
           .replace(/~~(.*?)~~/gu, '<code>$1</code>') // ~~code~~
@@ -245,3 +281,4 @@ export default (tx: str, cb: Cb = {}): str => {
   while (0 < nDiv--) res += '</div>'
   return res.replace(/\x01/g, '<')
 }
+*/
