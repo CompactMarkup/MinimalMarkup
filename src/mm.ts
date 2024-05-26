@@ -6,32 +6,47 @@ type str = string // minimal markup
 let sanitize = (tx: str): str =>
   tx.replace(/&/gu, '&amp;').replace(/</gu, '&lt;')
 
-// trim line ends, do simple markup
-// break: \\,
+// split into trimmed lines
+let split = (tx: str): str[] => tx.split('\n').map((line) => line.trimEnd())
+
+// join lines
+let join = (ls: str[]): str => ls.join('\n')
+
+// TODO inside out xx..xx
 // bold: *...*
 // italics: /.../
 // underline: _..._
 // code: ~...~
+let tags = (line: str): str =>
+  line
+    .replace(/\*\*(.*?)\*\*/gu, '<b>$1</b>')
+    .replace(/\/\/(.*?)\/\//gu, '<em>$1</em>')
+    .replace(/__(.*?)__/gu, '<u>$1</u>')
+    .replace(/~~(.*?)~~/gu, '<code>$1</code>')
+
 // n-dash: --
 // m-dash: --
-let simple = (tx: str): str =>
-  tx
-    .split('\n')
-    .map((line) =>
-      line
-        .trimEnd()
-        .replace(/\\\\/gu, '<br/>')
-        .replace(/\*\*(.*?)\*\*/gu, '<b>$1</b>')
-        .replace(/\/\/(.*?)\/\//gu, '<em>$1</em>')
-        .replace(/__(.*?)__/gu, '<u>$1</u>')
-        .replace(/~~(.*?)~~/gu, '<code>$1</code>')
-        .replace(/([^-])--([^-])/gu, '$1&ndash;$2')
-        .replace(/([^-])---([^-])/gu, '$1&mdash;$2'),
-    )
-    .join('\n')
+let typo = (line: str): str =>
+  line
+    .replace(/([^-])--([^-])/gu, '$1&ndash;$2')
+    .replace(/([^-])---([^-])/gu, '$1&mdash;$2')
+
+// break: \\,
+let breaks = (line: str): str => line.replace(/\\\\/gu, '<br/>')
+
+type fl = (line: str) => str
+let compose =
+  (...fns: fl[]) =>
+  (init: str) =>
+    fns.reduceRight((line, fn) => fn(line), init)
 
 // process minimal markup
-let mm = (tx: str): str => simple(sanitize(tx))
+let mm = (tx: str): str =>
+  sanitize(tx)
+    .split('\n')
+    .map((line) => breaks(typo(tags(line.trimEnd()))))
+    .join('\n')
+
 export default mm
 
 type ArgCb = (...args: str[]) => str

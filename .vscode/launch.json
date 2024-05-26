@@ -2,13 +2,11 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "node",
+      "type": "chrome",
       "request": "launch",
-      "name": "index.ts",
-      "program": "${workspaceFolder}/index.ts",
-      "preLaunchTask": "tsc: build - tsconfig.json",
-      "outFiles": ["${workspaceFolder}/out/**/*.js"],
-      "sourceMaps": true
+      "name": "Vite-Chrome",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}"
     }
   ]
 }

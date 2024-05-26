@@ -2,7 +2,7 @@
   "name": "minimal-markup",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "set BROWSER=google-chrome && vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "check": "tsc --noEmit",
