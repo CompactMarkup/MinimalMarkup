@@ -1,0 +1,15 @@
+<svg width='448' height='448' xmlns='http://www.w3.org/2000/svg'>
+  <g transform='translate(0,24)' stroke-linecap='round'>
+    <path transform='translate(224,224) rotate(135)' stroke='#a30' stroke-width='42' fill='none'
+      d='M0,-200 a 200 200 1 1 0 +200 200' />
+    <g transform='translate(224,206)' stroke='#c30' stroke-width='36'>
+      <line x1='-88' y1='-80' x2='-88' y2='80' />
+      <line x1='+88' y1='-80' x2='+88' y2='80' />
+      <line x1='-88' y1='-80' x2='0' y2='0' />
+      <line x1='+88' y1='-80' x2='0' y2='0' />
+    </g>
+    <g transform='translate(224,342)' stroke='#03c' stroke-width='36'>
+      <line x1='-88' y1='0' x2='+88' y2='0' />
+    </g>
+  </g>
+</svg>

@@ -1,2 +1,3 @@
 # MinimalMarkup
-A minimalistic markup: text ➔ html.
+
+An absolutely minimalistic markup processor: text ➔ html.
