@@ -31,65 +31,70 @@ let typo = (line: str): str =>
     .replace(/([^-])--([^-])/gu, '$1&ndash;$2')
     .replace(/([^-])---([^-])/gu, '$1&mdash;$2')
 
-// break: \\,
+// break: \\
 let breaks = (line: str): str => line.replace(/\\\\/gu, '<br/>')
 
-type fl = (line: str) => str
+// link root resolver
+let nulRoot = (href: str) => href
+
+// callbacks
+type CbRoot = (href: str) => str
+type CbImg = (src: str, width?: str) => str
+type CbLink = (text: str, href: str, root?: (href: str) => str) => str
+type CbArgs = (...args: str[]) => str
+
+export type Cbs = {
+  root?: CbRoot // root resolver
+  img?: CbImg // [[src (|width)]]
+  link?: CbLink // ((text|href))
+  args?: CbArgs // (((tag|...)))
+}
+
+let defCbs: Cbs = {
+  root: (href:str)=>href,
+  img: (src,width) => {
+    return root + `<img${width ? ` style="width:${width.trim()}"` : ''} src="${cb.img!(src.trim())}" alt=""/>`
+  }
+  link: (text, link, root) => {
+    if (!link.includes('://')) link = (root || nulRoot)(link)
+    link = JSON.stringify(link)
+    return `<a target="_blank" href=${link}/>${text}</a>`
+  },
+  args: (tag) => tag,
+}
+
+let cbImg = (line: str, cb: CbImg): str =>
+  line.replace(
+    /\(\(\(([\s\S]*?)\|([^\|]*)\|([\s\S]*?)\)\)\)/gu,
+    (_, tag, src, val) => cb(tag.trim(), src.trim(), val.trim()),
+  )
+
+let cbLink = (line: str, cb: CbLink): str =>
+  line.replace(/\(\((.*)\|(.*)\)\)/gu, (_, text, link) =>
+    cb(text.trim(), link.trim()),
+  )
+
+let cbArgs = (line: str, cb: CbArgs): str =>
+  line.replace(/\(\((.*)\|(.*)\)\)/gu, (_, text, link) =>
+    cb(text.trim(), link.trim()),
+  )
+
 let compose =
-  (...fns: fl[]) =>
+  (...fns: ((line: str) => str)[]) =>
   (init: str) =>
     fns.reduceRight((line, fn) => fn(line), init)
 
-// process minimal markup
+// process minimal markup:
+// split into lines, trim ends, process listeners, join
 let mm = (tx: str): str =>
   sanitize(tx)
     .split('\n')
-    .map((line) => breaks(typo(tags(line.trimEnd()))))
+    .map((line) => compose(breaks, typo, tags)(line.trimEnd()))
     .join('\n')
 
 export default mm
 
-type ArgCb = (...args: str[]) => str
-type ImgCb = (src: str) => str
-type LinkCb = (text: str, href: str, loc?: (url: str) => str) => str
-
-/**
- * callbacks
- *
- * @typedef {Object} Cb
- * @property {ArgCb} [val] - callback for `[[tag|img|val]]`
- * @property {ImgCb} [img] - callback for `[[image (|width)]]`
- * @property {LinkCb} [link] - callback for `((text|link))`
- */
-export type Cb = {
-  arg?: ArgCb
-  img?: ImgCb
-  link?: LinkCb
-}
-
-/**
- * Default location resolver.
- * Returns the input url unchanged.
- *
- * @param {str} url - The url to resolve.
- * @returns {str} The input url unchanged.
- */
-// let defLoc = (url: str) => url
-
-/**
- * Default callbacks
- * @type {Cb}
- */
 /*
-let defCb: Cb = {
-  arg: (tag) => tag,
-  img: (src) => src,
-  link: (text, href, loc) => {
-    if (!href.includes('://')) href = (loc || defLoc)(href)
-    href = JSON.stringify(href)
-    return `<a target="_blank" href=${href}/>${text}</a>`
-  },
-}
 
 // wrap tag around val
 let tag = (tag: str, val: str) => `<${tag}>${val}</${tag}>`
@@ -265,11 +270,7 @@ let qqq = (tx: str, cb: Cb = {}): str => {
     )
     .join('\n')
 
-  tx = tx.replace(
-    /\(\(\(([\s\S]*?)\|([^\|]*)\|([\s\S]*?)\)\)\)/gu, // (((tag|img|val)))
-    (_, tag, img, val) =>
-      cb.arg!(tag.trim(), img.trim(), val.replace(/\n/g, '0x01')),
-  )
+
 
   // split to lines and process
   tx.split('\n').map((line) => {
@@ -278,7 +279,7 @@ let qqq = (tx: str, cb: Cb = {}): str => {
     line = line
       .trimEnd()
       .replace(
-        /\[\[(.*)\]\]/gu, // [[image (|width)]]
+        /\[\[(.*)\]\]/gu, //
         (_, img) => {
           let [src, w] = img.split('|')
           let style = w ? ` style="width:${w.trim()}"` : ''
